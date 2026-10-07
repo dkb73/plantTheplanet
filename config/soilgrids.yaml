@@ -1,0 +1,48 @@
+# Static SoilGrids REST API settings and query catalogs.
+# See soilgrid_point.py and soilgrid_config.py.
+
+rest:
+  query_url: https://rest.isric.org/soilgrids/v2.0/properties/query
+  timeout_s: 60
+  accept: application/json
+
+# Depth labels accepted by the REST API (SoilGrids / WCS depth bands).
+depths:
+  - 0-5cm
+  - 5-15cm
+  - 15-30cm
+  - 30-60cm
+  - 60-100cm
+  - 100-200cm
+
+# Statistic names match REST ``value`` parameter and WCS COVERAGEID suffixes.
+statistics:
+  - mean
+  - Q0.05
+  - Q0.5
+  - Q0.95
+  - uncertainty
+
+# Soil properties commonly queried at a point.
+properties:
+  - phh2o
+  - clay
+  - silt
+  - sand
+
+# Defaults when callers do not pass explicit lists (optional overrides per field).
+defaults:
+  properties: null # null → use ``properties`` list above
+  depths: null # null → use full ``depths`` catalog
+  statistics:
+    - mean
+
+# Values used by ``python soilgrid_point.py``.
+demo:
+  latitude: 12.25
+  longitude: 75.75
+  properties: null
+  depths:
+    - 0-5cm
+  statistics:
+    - mean
