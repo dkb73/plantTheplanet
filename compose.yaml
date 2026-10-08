@@ -1,0 +1,29 @@
+# Local Postgres for EcoCrop ingest.
+# Official image env vars + first-boot init: https://hub.docker.com/_/postgres
+# Compose volume for PG 16: /var/lib/postgresql/data (not the PG 18 path).
+#
+# Start:  docker compose up -d
+# Load:   python ingest_ecocrop.py
+# Reset:  docker compose down -v   (wipes data; init.sql runs again on next up)
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-plant}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-plant}
+      POSTGRES_DB: ${POSTGRES_DB:-planttheplanet}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-plant} -d ${POSTGRES_DB:-planttheplanet}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
