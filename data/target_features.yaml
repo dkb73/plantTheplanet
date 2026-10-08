@@ -1,0 +1,20 @@
+TEXT:
+  - heavy
+  - medium
+  - light
+  - organic
+  - wide
+FER:
+  - high
+  - low
+  - moderate
+DRA:
+  - well (dry spells)
+  - poorly (saturated >50% of year)
+  - excessive (dry/moderately dry)
+LIOPMN:
+  - clear skies
+  - very bright
+  - cloudy skies
+  - light shade
+  - heavy shade

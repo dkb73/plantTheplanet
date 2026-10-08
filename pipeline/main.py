@@ -1,4 +1,4 @@
-"""Fetch soil and historical weather for one point and return one list."""
+"""Fetch soil and historical weather for one point, classify with Laya, and return combined results."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import json
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from typing import Any, Dict
 
 _ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_ROOT))
@@ -18,6 +19,11 @@ from weather_analytics.historical_analysis.historical_weather_data import (
     fetch_historical_weather,
 )
 from soilgrid_point import query_soilgrids
+
+try:
+    from pipeline.classifier import classify_properties
+except ImportError:
+    from classifier import classify_properties
 
 _SOIL_PROPERTIES = (
     "phh2o",
@@ -31,8 +37,8 @@ _SOIL_PROPERTIES = (
 )
 
 
-def main(latitude: float, longitude: float) -> list[dict]:
-    """Query SoilGrids and NASA POWER together and append both result lists."""
+def main(latitude: float, longitude: float) -> Dict[str, Any]:
+    """Query SoilGrids and NASA POWER, then classify target features with Laya."""
     demo = _load_config()["demo"]
     with contextlib.redirect_stdout(io.StringIO()):
         with ThreadPoolExecutor(max_workers=2) as pool:
@@ -53,12 +59,20 @@ def main(latitude: float, longitude: float) -> list[dict]:
             )
             soil_rows = soil.result()["items"]
             weather_rows = weather.result()
-    return [*soil_rows, *weather_rows]
+
+    raw_properties = [*soil_rows, *weather_rows]
+    classifications = classify_properties(raw_properties)
+
+    return {
+        "properties": raw_properties,
+        "classifications": classifications,
+    }
 
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         raise SystemExit("usage: python pipeline/main.py <latitude> <longitude>")
-    rows = main(float(sys.argv[1]), float(sys.argv[2]))
-    json.dump(rows, sys.stdout, indent=2, ensure_ascii=False)
+    result = main(float(sys.argv[1]), float(sys.argv[2]))
+    json.dump(result, sys.stdout, indent=2, ensure_ascii=False)
     sys.stdout.write("\n")
+
