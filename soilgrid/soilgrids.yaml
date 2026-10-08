@@ -1,5 +1,5 @@
 # Static SoilGrids REST API settings and query catalogs.
-# See soilgrid_point.py and soilgrid_config.py.
+# See soilgrid_point.py and soilgrid_config.py in this folder.
 
 rest:
   query_url: https://rest.isric.org/soilgrids/v2.0/properties/query
@@ -37,7 +37,7 @@ defaults:
   statistics:
     - mean
 
-# Values used by ``python soilgrid_point.py``.
+# Values used by ``python soilgrid/soilgrid_point.py``.
 demo:
   latitude: 12.25
   longitude: 75.75

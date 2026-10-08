@@ -10,11 +10,12 @@ No ORM. Query with `psql` inside Docker, or pandas + `psycopg2` from the host.
 
 | Path | Role |
 |------|------|
-| `compose.yaml` | Postgres 16 container + named volume |
+| `compose.yaml` | Postgres 16 container + named volume (keep at repo root so the existing volume still attaches) |
 | `db/schema.sql` | `ecocrop` table (runs on **first** empty volume only) |
+| `db/ingest_ecocrop.py` | Pandas cleanup + `COPY` into `ecocrop` |
 | `data/data.csv` | Source rows (~2568) |
-| `ingest_ecocrop.py` | Pandas cleanup + `COPY` into `ecocrop` |
-| `.env.example` | Copy to `.env` to override defaults |
+| `.env.example` | Copy to `.env` at repo root to override defaults |
+| `soilgrid/` | SoilGrids REST client + `soilgrids.yaml` (unrelated to Postgres) |
 
 Run Compose commands from the repo root (`PlantThePlanet`), where `compose.yaml` sits.
 
@@ -39,8 +40,8 @@ These match `POSTGRES_*` in `compose.yaml` / `.env.example`.
 ## Start, load, stop
 
 ```bash
-docker compose up -d          # start Postgres (does not load CSV)
-python ingest_ecocrop.py      # load / reload CSV (required at least once)
+docker compose up -d              # start Postgres (does not load CSV)
+python db/ingest_ecocrop.py       # load / reload CSV (required at least once)
 docker compose stop           # stop container; data stays
 docker compose up -d          # start again; data still there
 docker compose down           # remove container; volume (data) stays
@@ -49,7 +50,7 @@ docker compose down -v        # wipe volume → empty DB on next up
 
 `up -d`: `-d` means **detached** (background), not database.
 
-**Ingest is not automatic.** `up` only starts the server. Schema is created when the data volume is empty (`/docker-entrypoint-initdb.d/01_schema.sql`). Rows appear only after `ingest_ecocrop.py`.
+**Ingest is not automatic.** `up` only starts the server. Schema is created when the data volume is empty (`/docker-entrypoint-initdb.d/01_schema.sql`). Rows appear only after `python db/ingest_ecocrop.py`.
 
 **Re-running ingest:** truncate then copy. No duplicates. Full replace from `data/data.csv`. If it dies after truncate and before copy, the table can be empty until you run it again.
 

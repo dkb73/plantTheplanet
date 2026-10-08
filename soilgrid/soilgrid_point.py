@@ -17,7 +17,7 @@ from soilgrid_config import (
 _cfg_rest = rest_settings()
 REST_QUERY_URL: str = str(_cfg_rest["query_url"])
 
-# Catalogs from config/soilgrids.yaml (same labels as SoilGrids REST / WCS).
+# Catalogs from soilgrids.yaml (same labels as SoilGrids REST / WCS).
 DEPTHS = catalog_depths()
 STATISTICS = catalog_statistics()
 PROPERTIES = catalog_properties()

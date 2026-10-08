@@ -1,4 +1,4 @@
-"""Load static SoilGrids settings from config/soilgrids.yaml."""
+"""Load static SoilGrids settings from soilgrid/soilgrids.yaml."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from typing import Any, Mapping, Sequence
 
 import yaml
 
-_CONFIG_PATH = Path(__file__).resolve().parent / "config" / "soilgrids.yaml"
+_CONFIG_PATH = Path(__file__).resolve().parent / "soilgrids.yaml"
 
 
 @lru_cache(maxsize=1)

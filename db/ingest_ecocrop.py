@@ -1,4 +1,4 @@
-"""Load data/data.csv into the Docker Postgres `ecocrop` table.
+"""Load repo-root data/data.csv into the Docker Postgres `ecocrop` table.
 
 FAO EcoCrop uses blank cells and the token NA for missing values.
 COPY cannot treat both as NULL in one pass, so pandas normalizes first,
@@ -17,8 +17,9 @@ from pathlib import Path
 import pandas as pd
 import psycopg2
 
-CSV_PATH = Path(__file__).resolve().parent / "data" / "data.csv"
-SCHEMA_PATH = Path(__file__).resolve().parent / "db" / "schema.sql"
+_DB_DIR = Path(__file__).resolve().parent
+CSV_PATH = _DB_DIR.parent / "data" / "data.csv"
+SCHEMA_PATH = _DB_DIR / "schema.sql"
 
 # Tokens that pandas should treat as missing (keep_default_na still catches NaN).
 NA_VALUES = ["", "NA", "na", "NULL", "null", "None"]

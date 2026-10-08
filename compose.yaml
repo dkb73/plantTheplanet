@@ -2,9 +2,9 @@
 # Official image env vars + first-boot init: https://hub.docker.com/_/postgres
 # Compose volume for PG 16: /var/lib/postgresql/data (not the PG 18 path).
 #
-# Start:  docker compose up -d
-# Load:   python ingest_ecocrop.py
-# Reset:  docker compose down -v   (wipes data; init.sql runs again on next up)
+# Start:  docker compose up -d          (from repo root)
+# Load:   python db/ingest_ecocrop.py
+# Reset:  docker compose down -v        (wipes data; schema.sql runs again on next up)
 
 services:
   db:
