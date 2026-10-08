@@ -29,6 +29,10 @@ properties:
   - clay
   - silt
   - sand
+  - soc
+  - nitrogen
+  - cec
+  - cfvo
 
 # Defaults when callers do not pass explicit lists (optional overrides per field).
 defaults:

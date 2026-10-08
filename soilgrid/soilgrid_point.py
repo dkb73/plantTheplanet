@@ -141,7 +141,7 @@ if __name__ == "__main__":
     out = query_soilgrids(
         latitude=12.25,
         longitude=75.75,
-        properties=["phh2o", "clay"],
+        properties=["phh2o", "clay","sand","silt","soc","nitrogen","cec","cfvo"],
         depths=["0-5cm"],
         statistics=["mean"],
     )

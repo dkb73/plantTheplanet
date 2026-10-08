@@ -117,12 +117,12 @@ def fetch_power_aggregates(
             continue
         result.append(
             {
-                name: {
+                    "property": name,
                     "min": min(values),
                     "max": max(values),
                     "median": median(values),
                     "unit": unit,
-                }
+                
             }
         )
     return result
