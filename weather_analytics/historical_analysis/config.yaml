@@ -1,0 +1,25 @@
+# NASA POWER daily point API
+# https://power.larc.nasa.gov/docs/services/api/temporal/daily/
+# OpenAPI: https://power.larc.nasa.gov/api/temporal/daily/openapi.json
+
+daily_point_url: "https://power.larc.nasa.gov/api/temporal/daily/point"
+max_params_per_request: 20
+request_timeout_s: 60
+fill_value: -999
+format: JSON
+community: ag
+lookback_years: 1
+
+# T2M          — Temperature at 2 Meters
+# PRECTOTCORR  — Precipitation Corrected
+# CLOUD_AMT    — Cloud Amount
+default_parameters:
+  - T2M
+  - PRECTOTCORR
+  - CLOUD_AMT
+
+demo:
+  latitude: 28.6139
+  longitude: 77.2090
+  today: "2026-10-08"
+  harvest_cycle_days: 14
