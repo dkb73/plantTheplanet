@@ -1,5 +1,9 @@
 # 🌱 PlantMyPlanet — Precision AI Garden Planner & Botanical Intelligence
 
+<p align="center">
+  <img src="readme/banner.png" alt="PlantMyPlanet Banner" width="100%" />
+</p>
+
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)](https://fastapi.tiangolo.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://www.postgresql.org/)
@@ -114,15 +118,15 @@ A full walkthrough video is available in [`demo/demo-video.mov`](demo/demo-video
 
 | **1. Site Analysis & Geospatial Radar** | **2. FAO EcoCrop Discovery Grid** |
 |:---:|:---:|
-| ![Site Analysis Radar](demo/01-site-analysis-radar.png) | ![EcoCrop Catalog Grid](demo/02-ecocrop-catalog-grid.png) |
+| ![Site Analysis Radar](readme/01-site-analysis-radar.png) | ![EcoCrop Catalog Grid](readme/02-ecocrop-catalog-grid.png) |
 
 | **3. Crop Environmental Suitability** | **4. Botanical Morphology & Growing Matrix** |
 |:---:|:---:|
-| ![Crop Intelligence Detail](demo/03-crop-intelligence-detail.png) | ![Botanical Morphology](demo/04-botanical-morphology-specs.png) |
+| ![Crop Intelligence Detail](readme/03-crop-intelligence-detail.png) | ![Botanical Morphology](readme/04-botanical-morphology-specs.png) |
 
 | **5. AI-Calibrated Growth Timeline** | **6. Context-Aware AI Chat Companion** |
 |:---:|:---:|
-| ![AI Garden Planner Timeline](demo/05-ai-garden-planner-timeline.png) | ![AI Botanical Assistant](demo/06-ai-botanical-assistant-chat.png) |
+| ![AI Garden Planner Timeline](readme/05-ai-garden-planner-timeline.png) | ![AI Botanical Assistant](readme/06-ai-botanical-assistant-chat.png) |
 
 ---
 
