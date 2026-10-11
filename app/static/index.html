@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PlantMyPlanet — Precision AI Garden Planner & Botanical Intelligence</title>
+  
+  <!-- Google Fonts: Playfair Display + Plus Jakarta Sans + Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  
+  <!-- Markdown Renderer for LLM Botanical Chat -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Tailwind CSS via CDN with High-Contrast Designer Tokens -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            // High-contrast, clean neutral canvas & surfaces (No monochromatic sickly green!)
+            "background": "#f8fafc",
+            "surface": "#f8fafc",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f1f5f9",
+            "surface-container": "#e2e8f0",
+            "surface-container-high": "#cbd5e1",
+            "surface-dim": "#f8fafc",
+
+            // High-contrast, rich charcoal typography
+            "on-surface": "#0f172a",
+            "on-surface-variant": "#475569",
+            "outline": "#64748b",
+            "outline-variant": "#e2e8f0",
+
+            // Deep Forest Green for primary actions & brand
+            "primary": "#0f3822",
+            "primary-container": "#166534",
+            "on-primary": "#ffffff",
+
+            // Emerald Green for suitability score & positive validation
+            "secondary": "#059669",
+            "secondary-container": "#dcfce7",
+            "on-secondary-container": "#14532d",
+
+            // Warm Terracotta / Amber for soil & harvest indicators
+            "tertiary": "#b45309",
+            "tertiary-container": "#fef3c7",
+            "on-tertiary-container": "#78350f",
+
+            "error": "#b91c1c",
+            "error-container": "#fee2e2"
+          },
+          fontFamily: {
+            "display": ["Playfair Display", "serif"],
+            "headline-lg": ["Playfair Display", "serif"],
+            "headline-md": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "body-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "body-md": ["Plus Jakarta Sans", "sans-serif"],
+            "body-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "label-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "sans-serif"],
+            "label-xs": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #f8fafc;
+      color: #0f172a;
+      overscroll-behavior: none;
+    }
+    ::-webkit-scrollbar { display: none; }
+
+    /* Markdown Formatted Content in Chat */
+    .chat-markdown {
+      line-height: 1.6;
+      color: #1e293b;
+    }
+    .chat-markdown h1, .chat-markdown h2, .chat-markdown h3, .chat-markdown h4 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 0.75rem;
+      margin-bottom: 0.35rem;
+    }
+    .chat-markdown h3 { font-size: 1.05rem; }
+    .chat-markdown h4 { font-size: 0.95rem; }
+    .chat-markdown p {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+      color: #1e293b;
+    }
+    .chat-markdown ul {
+      margin-left: 1.25rem !important;
+      margin-bottom: 0.5rem !important;
+      list-style-type: disc !important;
+    }
+    .chat-markdown ol {
+      margin-left: 1.25rem !important;
+      margin-bottom: 0.5rem !important;
+      list-style-type: decimal !important;
+    }
+    .chat-markdown li {
+      margin-bottom: 0.25rem;
+      line-height: 1.55;
+      color: #334155;
+      display: list-item !important;
+    }
+    .chat-markdown strong {
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .chat-markdown em {
+      font-style: italic;
+      color: #475569;
+    }
+    .chat-markdown code {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+      border: 1px solid #e2e8f0;
+    }
+    .chat-markdown blockquote {
+      border-left: 3px solid #10b981;
+      padding-left: 0.75rem;
+      margin-left: 0;
+      margin-right: 0;
+      color: #475569;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body class="bg-background font-body-md text-on-surface min-h-screen flex flex-col antialiased">
+
+  <!-- TOP NAVIGATION HEADER (Single Line, No Hardiness Zone in navbar, Clean & Crisp) -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <div class="h-16 w-full max-w-[1440px] mx-auto px-6 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Left Nav -->
+      <div class="flex items-center gap-6 flex-shrink-0">
+        <a class="flex items-center gap-2 cursor-pointer group select-none" onclick="navigateTo('landing')">
+          <div class="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center font-bold text-lg shadow-sm">🌱</div>
+          <div class="flex items-baseline gap-1.5 whitespace-nowrap">
+            <span class="font-headline-sm text-lg font-bold text-slate-900 tracking-tight group-hover:text-emerald-700 transition-colors">PlantMyPlanet</span>
+            <span class="font-label-xs text-[11px] uppercase tracking-wider text-slate-400 font-semibold hidden sm:inline">Garden Intelligence</span>
+          </div>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-1.5" id="main-nav">
+          <button id="nav-landing" onclick="navigateTo('landing')" class="nav-link bg-emerald-800 text-white font-label-md text-sm rounded-full px-4 py-1.5 shadow-sm transition-all whitespace-nowrap cursor-pointer">Home</button>
+          <button id="nav-discovery" onclick="navigateTo('discovery')" class="nav-link font-label-md text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 px-4 py-1.5 rounded-full transition-all whitespace-nowrap cursor-pointer">Discover Plants</button>
+          <button id="nav-garden" onclick="navigateTo('garden')" class="nav-link font-label-md text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 px-4 py-1.5 rounded-full transition-all whitespace-nowrap cursor-pointer">My Garden (<span id="garden-count">0</span>)</button>
+        </nav>
+      </div>
+
+      <!-- Right Nav: Compact Weather Chip & Auth (Strictly 1 line, No Wrapping) -->
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <!-- Weather & Coordinates Pill (Compact Single Line) -->
+        <div class="hidden lg:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-medium whitespace-nowrap">
+          <span class="material-symbols-outlined text-[15px] text-emerald-700">location_on</span>
+          <span id="header-coords">12.30° N, 77.64° E</span>
+          <span class="text-slate-300">•</span>
+          <span class="material-symbols-outlined text-[15px] text-amber-600">wb_sunny</span>
+          <span id="header-weather">24°C Sunny</span>
+        </div>
+
+        <!-- Auth Header Container -->
+        <div id="auth-header-container" class="flex items-center gap-2 whitespace-nowrap">
+          <button class="py-1.5 px-4 rounded-full bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1 cursor-pointer" onclick="openAuthModal('login')">
+            <span class="material-symbols-outlined text-[16px]">login</span>
+            <span>Sign In</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN APP VIEWS -->
+  <main class="w-full pt-16 flex-1">
+
+    <!-- SCREEN 1: LANDING & LOCATION EXPLORER -->
+    <section id="view-landing" class="w-full max-w-[1440px] mx-auto px-6 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center py-6">
+        <!-- Hero Text -->
+        <div class="lg:col-span-6 flex flex-col gap-4">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold w-fit border border-slate-200">
+            <span class="material-symbols-outlined text-[16px] text-emerald-600">psychology_alt</span>
+            <span>Microclimate Soil & Weather Radar v3.4</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 ml-1 animate-pulse"></span>
+          </div>
+          <h1 class="font-display text-4xl lg:text-5xl text-slate-900 tracking-tight leading-tight">
+            Grow Thriving Gardens with <span class="italic text-emerald-800">PlantMyPlanet</span>
+          </h1>
+          <p class="text-slate-600 text-base leading-relaxed max-w-xl">
+            Tailored to your exact coordinates, local soil texture, and real-time forecasts. Get deterministic planting suitability, personalized timelines, and grounded AI botanical guidance.
+          </p>
+
+          <!-- Metric Strip -->
+          <div class="grid grid-cols-3 gap-3 pt-2 max-w-lg">
+            <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-sm flex flex-col">
+              <span class="text-2xl font-bold text-slate-900">99.4%</span>
+              <span class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Climate Match</span>
+            </div>
+            <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-sm flex flex-col">
+              <span class="text-2xl font-bold text-slate-900">16-Day</span>
+              <span class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Weather Radar</span>
+            </div>
+            <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-sm flex flex-col">
+              <span class="text-2xl font-bold text-emerald-700">2,568+</span>
+              <span class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Botanical Crops</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coordinate Radar Card -->
+        <div class="lg:col-span-6">
+          <div class="rounded-2xl bg-white p-6 shadow-md border border-slate-200">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-700 text-[20px]">satellite_alt</span>
+                <span class="text-slate-900 font-bold text-sm">Microclimate Coordinate Radar</span>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold uppercase tracking-wider">Live Calibrated</span>
+            </div>
+
+            <form class="mt-4 flex flex-col gap-4" onsubmit="event.preventDefault(); loadRecommendations(true);">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Latitude</label>
+                  <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">north</span>
+                    <input class="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-slate-900 text-sm focus:bg-white focus:border-emerald-600 outline-none transition-all" id="input-lat" type="number" step="0.0001" value="12.2958"/>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Longitude</label>
+                  <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">west</span>
+                    <input class="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-slate-900 text-sm focus:bg-white focus:border-emerald-600 outline-none transition-all" id="input-lon" type="number" step="0.0001" value="76.6394"/>
+                  </div>
+                </div>
+              </div>
+
+              <button class="w-full py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center justify-center gap-2 text-xs font-semibold transition-all cursor-pointer" onclick="detectGPSLocation()" type="button">
+                <span class="material-symbols-outlined text-[16px] text-emerald-700">my_location</span>
+                <span>Auto-Detect Current GPS Coordinates</span>
+              </button>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Plot Morphology & Scale</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="landing-scale-pills">
+                  <button class="scale-pill py-2 px-2 text-center rounded-lg bg-emerald-800 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer" data-scale="home_garden" onclick="selectScale(this)" type="button">Home Bed</button>
+                  <button class="scale-pill py-2 px-2 text-center rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition-all cursor-pointer" data-scale="container" onclick="selectScale(this)" type="button">Container Pot</button>
+                  <button class="scale-pill py-2 px-2 text-center rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition-all cursor-pointer" data-scale="greenhouse" onclick="selectScale(this)" type="button">Greenhouse</button>
+                  <button class="scale-pill py-2 px-2 text-center rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition-all cursor-pointer" data-scale="production_farm" onclick="selectScale(this)" type="button">Farm Plot</button>
+                </div>
+              </div>
+
+              <button class="w-full py-3 px-6 rounded-full bg-emerald-800 hover:bg-emerald-700 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow transition-all cursor-pointer" type="submit">
+                <span id="btn-explore-text">Explore Location Recommendations</span>
+                <span id="btn-explore-spinner" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin hidden"></span>
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </button>
+            </form>
+
+            <div class="mt-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+              <span class="material-symbols-outlined text-emerald-700 text-[20px] mt-0.5">verified_user</span>
+              <div class="text-xs text-slate-600 leading-relaxed">
+                <strong class="text-slate-900">Deterministic Ecological Verification:</strong> Cross-referenced with SoilGrids 0-5cm texture/pH, NASA POWER historical rain, and Open-Meteo forecasts.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: PLANT DISCOVERY & DETAILS PANEL -->
+    <section id="view-discovery" class="w-full max-w-[1440px] mx-auto px-6 py-6 hidden">
+      <!-- Ambient Microclimate Subheader Bar -->
+      <div class="w-full flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 text-xs text-slate-700 shadow-sm">
+            <span class="material-symbols-outlined text-[15px] text-emerald-700">location_on</span>
+            <span id="discovery-loc-label" class="font-medium">Active Coordinates: 12.30° N, 76.64° E</span>
+            <span class="text-slate-300">•</span>
+            <span class="text-emerald-800 font-semibold">Optimal Sowing Window</span>
+          </div>
+          <button class="text-emerald-800 hover:text-emerald-900 text-xs font-semibold underline underline-offset-4 cursor-pointer" onclick="navigateTo('landing')">
+            Edit Coordinates
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+            EcoCrop Grounded
+          </span>
+        </div>
+      </div>
+
+      <!-- 2-Column Responsive Workspace Grid -->
+      <div class="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- LEFT COLUMN: Search & Crop Cards (Col-Span 7) -->
+        <div class="lg:col-span-7 flex flex-col gap-4">
+          <!-- Search & Filter Bar -->
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3">
+            <div class="relative w-full">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+              <input class="w-full pl-9 pr-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 text-xs placeholder:text-slate-400 focus:bg-white focus:border-emerald-600 outline-none transition-all" id="search-crop-input" placeholder="Search crops by common name, scientific name, or variety..." type="text" oninput="filterDiscoveryCrops()"/>
+            </div>
+
+            <div class="flex items-center gap-2 overflow-x-auto pb-1" id="discovery-categories-bar">
+              <button class="cat-pill px-3.5 py-1 rounded-full bg-emerald-800 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer whitespace-nowrap" data-category="all" onclick="selectCategory('all', this)">All Crops</button>
+              <button class="cat-pill px-3.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap" data-category="vegetable" onclick="selectCategory('vegetable', this)">Vegetables</button>
+              <button class="cat-pill px-3.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap" data-category="fruit" onclick="selectCategory('fruit', this)">Fruits</button>
+              <button class="cat-pill px-3.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap" data-category="herb" onclick="selectCategory('herb', this)">Herbs & Spices</button>
+              <button class="cat-pill px-3.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap" data-category="medicinal" onclick="selectCategory('medicinal', this)">Medicinals</button>
+              <button class="cat-pill px-3.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap" data-category="cereal" onclick="selectCategory('cereal', this)">Grains & Cereals</button>
+            </div>
+          </div>
+
+          <!-- Crops Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="discovery-crops-grid">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Plant Details Side Panel (Col-Span 5, Sticky) -->
+        <div class="lg:col-span-5 sticky top-20" id="discovery-side-panel">
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200" id="side-panel-content">
+            <div class="text-center py-12 text-slate-400">
+              <span class="material-symbols-outlined text-4xl mb-2">yard</span>
+              <p class="text-xs">Select any crop card to inspect comprehensive botanical attributes, life form, and growth parameters.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: MY GARDEN USER DASHBOARD -->
+    <section id="view-garden" class="w-full max-w-[1440px] mx-auto px-6 py-6 hidden">
+      <!-- Garden Top Banner -->
+      <section class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold mb-1">
+              <span class="material-symbols-outlined text-[13px]">eco</span>
+              Horticultural Journal • Active Growing Season
+            </div>
+            <h1 class="font-headline-lg text-3xl font-bold text-slate-900 tracking-tight">My Garden</h1>
+            <p class="text-xs text-slate-500 mt-0.5">Tracking physiological growth stages, actionable care activities, and estimated harvest dates.</p>
+          </div>
+          <button class="px-5 py-2.5 rounded-full bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer self-start sm:self-auto" onclick="navigateTo('discovery')">
+            + Add New Planting
+          </button>
+        </div>
+
+        <!-- 4-Column Stat Cluster (Varied, designer palette) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+            <span class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Active Plantings</span>
+            <div class="my-1">
+              <span class="text-2xl font-bold text-slate-900" id="stat-active-count">0</span>
+              <span class="text-xs text-slate-500 ml-1">crops</span>
+            </div>
+            <span class="text-emerald-700 text-[11px] font-semibold flex items-center gap-1">
+              <span class="material-symbols-outlined text-[12px]">trending_up</span> 100% Tracking
+            </span>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+            <span class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Care Tasks</span>
+            <div class="my-1">
+              <span class="text-2xl font-bold text-emerald-700" id="stat-tasks-count">2</span>
+              <span class="text-xs text-slate-500 ml-1">scheduled</span>
+            </div>
+            <span class="text-slate-500 text-[11px]">Due for active stage</span>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+            <span class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Next Harvest</span>
+            <div class="my-1">
+              <span class="text-xl font-bold text-amber-700" id="stat-harvest-window">~30 days</span>
+            </div>
+            <span class="text-slate-500 text-[11px]">Calculated via timeline</span>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+            <span class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Environment</span>
+            <div class="my-1">
+              <span class="text-sm font-bold text-slate-900">Home Garden Bed</span>
+            </div>
+            <span class="text-slate-500 text-[11px]">Zone 10b Outdoor</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filter Bar -->
+      <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 mb-6 flex items-center justify-between gap-4">
+        <div class="relative flex-1 max-w-sm">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+          <input class="w-full bg-slate-50 pl-9 pr-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-600 outline-none" id="garden-search-input" oninput="filterGardenPlantings()" placeholder="Search planted crops..." type="text"/>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-slate-500 font-medium hidden sm:inline" for="garden-sort-select">Sort:</label>
+          <select class="bg-slate-50 border border-slate-200 text-slate-800 text-xs py-1.5 px-3 rounded-lg focus:outline-none cursor-pointer" id="garden-sort-select" onchange="loadGarden()">
+            <option value="planting_date">Planting Date (Newest First)</option>
+            <option value="created_at">Date Added</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Garden Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="garden-grid">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- SCREEN 4: PLANT DASHBOARD & AI BOTANICAL COMPANION -->
+    <section id="view-plant-detail" class="w-full max-w-[1440px] mx-auto px-6 py-6 hidden">
+      <!-- Breadcrumb & Top Bar -->
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <nav class="flex items-center gap-2 text-xs text-slate-500">
+          <button class="hover:text-emerald-800 transition-colors flex items-center gap-1 cursor-pointer font-medium" onclick="navigateTo('garden')">
+            <span class="material-symbols-outlined text-[15px]">potted_plant</span>
+            <span>My Garden</span>
+          </button>
+          <span class="text-slate-300">/</span>
+          <span class="text-slate-900 font-semibold" id="detail-breadcrumb-name">Plant Dashboard</span>
+        </nav>
+        <div class="flex items-center gap-2">
+          <button class="px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 flex items-center gap-1 cursor-pointer" onclick="focusObservationInput()">
+            <span class="material-symbols-outlined text-[15px]">edit_note</span>
+            <span>Log Note</span>
+          </button>
+          <button class="px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 flex items-center gap-1 cursor-pointer" onclick="retryPlantPlan()">
+            <span class="material-symbols-outlined text-[15px]">sync</span>
+            <span>Recalculate Plan</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hero Identity & Vitals Deck -->
+      <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-5 items-start lg:items-center justify-between mb-6">
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-3xl shadow-inner flex-shrink-0">
+            🌱
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="font-headline-lg text-2xl font-bold text-slate-900 tracking-tight" id="detail-crop-name">Plant Name</h1>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold">Active Lifecycle</span>
+            </div>
+            <div class="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
+              <span class="italic font-display text-slate-700" id="detail-sci-name">Scientific name</span>
+              <span class="text-slate-300">•</span>
+              <span class="text-emerald-700 font-semibold uppercase tracking-wider" id="detail-growing-scale">Home Garden Bed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vitals Matrix (High contrast, varied accents) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full lg:w-auto">
+          <div class="bg-amber-50/70 border border-amber-200/80 rounded-lg p-2.5 flex flex-col justify-between">
+            <span class="text-[10px] uppercase tracking-wider text-amber-700 font-bold flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">wb_sunny</span> Ambient Temp
+            </span>
+            <span class="text-base font-bold text-slate-900 mt-1">24°C</span>
+            <span class="text-[11px] text-amber-800 font-medium">Optimal Growth</span>
+          </div>
+
+          <div class="bg-sky-50/70 border border-sky-200/80 rounded-lg p-2.5 flex flex-col justify-between">
+            <span class="text-[10px] uppercase tracking-wider text-sky-700 font-bold flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">water_drop</span> Soil Hydration
+            </span>
+            <span class="text-base font-bold text-slate-900 mt-1">Moist & Aerated</span>
+            <span class="text-[11px] text-sky-800 font-medium">Well-Drained</span>
+          </div>
+
+          <div class="bg-purple-50/70 border border-purple-200/80 rounded-lg p-2.5 flex flex-col justify-between">
+            <span class="text-[10px] uppercase tracking-wider text-purple-700 font-bold flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">solar_power</span> Sunlight
+            </span>
+            <span class="text-base font-bold text-slate-900 mt-1">Full Sun</span>
+            <span class="text-[11px] text-purple-800 font-medium">6+ Hours Daily</span>
+          </div>
+
+          <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-lg p-2.5 flex flex-col justify-between">
+            <span class="text-[10px] uppercase tracking-wider text-emerald-700 font-bold flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">calendar_month</span> Days Elapsed
+            </span>
+            <span class="text-base font-bold text-emerald-800 mt-1" id="detail-days-elapsed">Day 0</span>
+            <span class="text-[11px] text-slate-600 truncate font-medium" id="detail-est-harvest">Harvest: Calc</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main 2-Column: Timeline (60%) & AI Companion Chat (40%) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- LEFT: Lifecycle Timeline & Observations (Col-Span 7) -->
+        <div class="lg:col-span-7 flex flex-col gap-6">
+          <section class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+              <div>
+                <h2 class="font-headline-sm text-lg font-bold text-slate-900">Personalized Lifecycle Timeline</h2>
+                <p class="text-xs text-slate-500 mt-0.5" id="detail-plan-summary">4-Stage AI-Generated Plan</p>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
+                Synchronized
+              </span>
+            </div>
+
+            <!-- Stages Container -->
+            <div class="flex flex-col gap-3.5" id="detail-stages-container">
+              <!-- Dynamically populated -->
+            </div>
+          </section>
+
+          <!-- Observations Section -->
+          <section class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+            <h3 class="font-headline-sm text-base font-bold text-slate-900 mb-1">📝 Field Observations & Journal</h3>
+            <p class="text-xs text-slate-500 mb-3">Record emergence notes, leaf symptoms, organic treatments, or watering adjustments.</p>
+
+            <form onsubmit="handleObservationSubmit(event)" class="flex gap-2 mb-3">
+              <input type="text" id="input-new-observation" required placeholder="e.g. First green sprout emerging, soil damp and warm..." class="flex-1 bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-lg text-xs text-slate-900 outline-none focus:bg-white focus:border-emerald-600 transition-all">
+              <button type="submit" class="py-2 px-4 rounded-full bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">Add Note</button>
+            </form>
+
+            <div class="flex flex-col gap-2 max-h-56 overflow-y-auto" id="detail-observations-list">
+              <!-- Dynamically populated -->
+            </div>
+          </section>
+        </div>
+
+        <!-- RIGHT: AI Botanical Companion Chat (Col-Span 5, Sticky) -->
+        <div class="lg:col-span-5 sticky top-20">
+          <section class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-[640px] overflow-hidden">
+            <!-- Chat Header -->
+            <div class="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-emerald-800 text-white flex items-center justify-center font-bold text-xs">AI</div>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900 leading-tight">PlantMyPlanet Advisor</h4>
+                  <p class="text-[11px] text-emerald-700 font-medium">Grounded in Current Age & Weather</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Suggestion Chips -->
+            <div class="px-3.5 py-2 bg-slate-50/60 border-b border-slate-200 flex gap-1.5 overflow-x-auto text-nowrap">
+              <button class="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 hover:border-emerald-600 text-slate-700 text-[11px] font-medium transition-all cursor-pointer" onclick="askPresetQuestion('What care activities should I focus on this week?')">
+                What to do this week?
+              </button>
+              <button class="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 hover:border-emerald-600 text-slate-700 text-[11px] font-medium transition-all cursor-pointer" onclick="askPresetQuestion('Why are the lower leaves turning yellow?')">
+                Why are leaves yellow?
+              </button>
+              <button class="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 hover:border-emerald-600 text-slate-700 text-[11px] font-medium transition-all cursor-pointer" onclick="askPresetQuestion('When is the optimal harvest window and how to tell?')">
+                When to harvest?
+              </button>
+            </div>
+
+            <!-- Chat Stream (Formatted Markdown Rendering) -->
+            <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-3" id="chat-stream">
+              <!-- Dynamically rendered -->
+            </div>
+
+            <!-- Chat Input Bar -->
+            <form onsubmit="handleChatSubmit(event)" class="p-3 border-t border-slate-200 bg-white flex gap-2 items-center">
+              <input type="text" id="chat-user-input" required placeholder="Ask your botanical assistant anything..." class="flex-1 bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-full text-xs text-slate-900 outline-none focus:bg-white focus:border-emerald-600 transition-all">
+              <button type="submit" id="chat-submit-btn" class="w-9 h-9 rounded-full bg-emerald-800 text-white flex items-center justify-center hover:bg-emerald-700 transition-all cursor-pointer flex-shrink-0">
+                <span class="material-symbols-outlined text-[18px]">send</span>
+              </button>
+            </form>
+          </section>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- AUTH MODAL -->
+  <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden" id="modal-auth">
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-sm shadow-xl mx-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="font-headline-sm text-lg font-bold text-slate-900" id="auth-modal-title">Sign In to PlantMyPlanet</h3>
+        <button class="text-slate-400 hover:text-slate-700 text-lg cursor-pointer" onclick="closeAuthModal()">✕</button>
+      </div>
+
+      <div class="flex gap-2 mb-4">
+        <button id="auth-tab-login" class="flex-1 py-1.5 rounded-full bg-emerald-800 text-white text-xs font-semibold transition-all cursor-pointer" onclick="setAuthMode('login')">Sign In</button>
+        <button id="auth-tab-register" class="flex-1 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition-all cursor-pointer" onclick="setAuthMode('register')">Create Account</button>
+      </div>
+
+      <form onsubmit="handleAuthSubmit(event)" class="flex flex-col gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+          <input type="email" id="auth-email-input" required placeholder="gardener@example.com" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg text-xs text-slate-900 outline-none focus:bg-white focus:border-emerald-600">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+          <input type="password" id="auth-password-input" required minlength="6" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg text-xs text-slate-900 outline-none focus:bg-white focus:border-emerald-600">
+        </div>
+
+        <div id="auth-error-msg" class="text-rose-600 text-xs hidden font-medium"></div>
+
+        <button type="submit" class="w-full mt-2 py-2.5 rounded-full bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <span id="auth-submit-text">Continue</span>
+          <span id="auth-submit-spinner" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin hidden"></span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- CONFIRM PLANTING MODAL -->
+  <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden" id="modal-confirm-plant">
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-sm shadow-xl mx-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="font-headline-sm text-lg font-bold text-slate-900">🌱 Confirm Planting</h3>
+        <button class="text-slate-400 hover:text-slate-700 text-lg cursor-pointer" onclick="closeConfirmModal()">✕</button>
+      </div>
+
+      <div class="mb-4 p-3 rounded-lg bg-slate-50 border border-slate-200">
+        <div class="font-bold text-slate-900 text-sm" id="confirm-crop-common">Crop Name</div>
+        <div class="text-xs text-slate-500 italic mt-0.5" id="confirm-crop-sci">Scientific Name</div>
+      </div>
+
+      <form onsubmit="handleConfirmPlantingSubmit(event)" class="flex flex-col gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Growing Scale & Setup</label>
+          <select id="confirm-scale-select" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg text-xs text-slate-900 outline-none">
+            <option value="home_garden">Home Garden Bed Plot</option>
+            <option value="container">Container Pot / Patio Box</option>
+            <option value="greenhouse">Protected Greenhouse</option>
+            <option value="production_farm">Agricultural Farm Bed</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Planting Date</label>
+          <input type="date" id="confirm-date-input" required class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg text-xs text-slate-900 outline-none">
+        </div>
+
+        <button type="submit" class="w-full mt-2 py-2.5 rounded-full bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <span id="confirm-submit-text">Confirm & Generate Personalized Plan</span>
+          <span id="confirm-submit-spinner" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin hidden"></span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

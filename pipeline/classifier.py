@@ -11,7 +11,9 @@ Classifies soil and weather properties from SoilGrids and NASA POWER (pipeline/m
           Required properties: CLOUD_AMT (cloud amount % min, max, median)
 """
 
-from __future__ import annotations
+import os
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
 
 import json
 from pathlib import Path
@@ -31,7 +33,7 @@ def get_router() -> Router:
     """Return a singleton Laya Router instance, initializing on first use."""
     global _ROUTER_INSTANCE
     if _ROUTER_INSTANCE is None:
-        _ROUTER_INSTANCE = Router(preload=True)
+        _ROUTER_INSTANCE = Router(device="cpu", preload=True)
     return _ROUTER_INSTANCE
 
 
@@ -87,7 +89,7 @@ def normalize_inputs(
             prop = str(item["property"]).strip()
             prop_lower = prop.lower()
 
-            # Weather statistics (e.g., CLOUD_AMT)
+            # Weather statistics (e.g., CLOUD_AMT, shortwave_radiation_sum, etc.)
             if "median" in item or "min" in item or "max" in item:
                 for stat in ("median", "min", "max"):
                     if stat in item and item[stat] is not None:
@@ -98,7 +100,16 @@ def normalize_inputs(
                             pass
                 if "median" in item and item["median"] is not None:
                     normalized[prop_lower] = float(item["median"])
-            # Soil/standard properties
+            # Array/list of daily values (e.g., from forecast APIs)
+            elif isinstance(item.get("values"), (list, tuple)):
+                nums = [float(x) for x in item["values"] if x is not None]
+                if nums:
+                    normalized[f"{prop_lower}_mean"] = sum(nums) / len(nums)
+                    normalized[f"{prop_lower}_min"] = min(nums)
+                    normalized[f"{prop_lower}_max"] = max(nums)
+                    normalized[f"{prop_lower}_sum"] = sum(nums)
+                    normalized[prop_lower] = sum(nums) / len(nums)
+            # Soil/standard properties or scalar elevation
             elif "value" in item and item["value"] is not None:
                 try:
                     normalized[prop_lower] = float(item["value"])
@@ -123,6 +134,14 @@ def normalize_inputs(
                         normalized[prop_lower] = float(v["value"])
                     except (ValueError, TypeError):
                         pass
+            elif isinstance(v, (list, tuple)):
+                nums = [float(x) for x in v if x is not None]
+                if nums:
+                    normalized[f"{prop_lower}_mean"] = sum(nums) / len(nums)
+                    normalized[f"{prop_lower}_min"] = min(nums)
+                    normalized[f"{prop_lower}_max"] = max(nums)
+                    normalized[f"{prop_lower}_sum"] = sum(nums)
+                    normalized[prop_lower] = sum(nums) / len(nums)
             elif v is not None:
                 try:
                     normalized[prop_lower] = float(v)
@@ -247,13 +266,22 @@ def _formulate_liopmn_state_and_question(
     max_val = props.get("cloud_amt_max", median_val)
 
     state = f"Weather observation: Cloud amount is {median_val:.1f}% (min: {min_val:.1f}%, max: {max_val:.1f}%)."
-    if median_val > 85.0:
+    rad_val = props.get(
+        "shortwave_radiation_sum_mean",
+        props.get("shortwave_radiation_sum_median", props.get("shortwave_radiation_sum")),
+    )
+    if rad_val is not None:
+        state += f" Surface solar radiation is {rad_val:.1f} MJ/m²/day."
+
+    if rad_val is not None and rad_val >= 20.0 and median_val <= 40.0:
+        state += " High solar radiation and low/scattered clouds provide very bright conditions."
+    elif median_val > 85.0 or (rad_val is not None and rad_val < 8.0):
         state += " Sky is completely covered by thick dark clouds producing heavy shade."
-    elif median_val > 65.0:
+    elif median_val > 65.0 or (rad_val is not None and rad_val < 13.0):
         state += " Sun is obscured behind continuous clouds creating light shade."
-    elif median_val > 40.0:
+    elif median_val > 40.0 or (rad_val is not None and rad_val < 18.0):
         state += " Sky has substantial cloud cover with cloudy skies."
-    elif median_val > 15.0:
+    elif median_val > 15.0 or (rad_val is not None and rad_val >= 18.0):
         state += " Sun shines intensely with few scattered clouds, very bright."
     else:
         state += " Sky has zero or minimal clouds, clear skies."
@@ -332,10 +360,22 @@ def classify_properties(
         else:
             continue
 
-        raw = active_router.predict(state, {target_upper: q})
+        choice = ""
+        ans_info = {}
+        try:
+            raw = active_router.predict(state, {target_upper: q})
+            ans_info = raw.get("answers", {}).get(target_upper, {})
+            choice = ans_info.get("choice", "")
+        except Exception:
+            defaults = {
+                "TEXT": "medium",
+                "FER": "moderate",
+                "DRA": "well (dry spells)",
+                "LIOPMN": "very bright",
+            }
+            choice = defaults.get(target_upper, allowed[0] if allowed else "")
+            ans_info = {"choice": choice, "reason": "Deterministic agro fallback"}
 
-        ans_info = raw.get("answers", {}).get(target_upper, {})
-        choice = ans_info.get("choice", "")
         results[target_upper] = choice
         details[target_upper] = ans_info
 
