@@ -11,6 +11,7 @@
 
 ## 📑 Table of Contents
 - [Architecture & Deep-Tech Pipeline](#-architecture--deep-tech-pipeline)
+- [Visual Showcase & Demo](#-visual-showcase--demo)
 - [Key User Features](#-key-user-features)
 - [Tech Stack](#-tech-stack)
 - [Quick Start Guide](#-quick-start-guide)
@@ -104,6 +105,24 @@
 ### 5. Context-Grounded AI Lifecycle Generator & Botanical Advisor
 - Generates tailored, 4–5 stage physiological timelines (Germination, Seedling Establishment, Vegetative Canopy, Flowering/Fruiting, Harvesting) calibrated to active planting dates and growing scale.
 - Interactive Botanical Advisor equipped with active growth stage memory, accumulated growing degree metrics, and user-submitted field observations.
+
+---
+
+## 📸 Visual Showcase & Demo
+
+A full walkthrough video is available in [`demo/demo-video.mov`](demo/demo-video.mov).
+
+| **1. Site Analysis & Geospatial Radar** | **2. FAO EcoCrop Discovery Grid** |
+|:---:|:---:|
+| ![Site Analysis Radar](demo/01-site-analysis-radar.png) | ![EcoCrop Catalog Grid](demo/02-ecocrop-catalog-grid.png) |
+
+| **3. Crop Environmental Suitability** | **4. Botanical Morphology & Growing Matrix** |
+|:---:|:---:|
+| ![Crop Intelligence Detail](demo/03-crop-intelligence-detail.png) | ![Botanical Morphology](demo/04-botanical-morphology-specs.png) |
+
+| **5. AI-Calibrated Growth Timeline** | **6. Context-Aware AI Chat Companion** |
+|:---:|:---:|
+| ![AI Garden Planner Timeline](demo/05-ai-garden-planner-timeline.png) | ![AI Botanical Assistant](demo/06-ai-botanical-assistant-chat.png) |
 
 ---
 
